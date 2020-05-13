@@ -1,0 +1,7 @@
+.idea/
+venv/
+logs/
+checkpoint/
+models/
+lib/Carla
+*.png

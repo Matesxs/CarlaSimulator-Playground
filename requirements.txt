@@ -1,0 +1,6 @@
+carla~=0.9.8
+numpy~=1.18.4
+psutil~=5.7.0
+colorlog~=4.1.0
+opencv-python~=4.2.0.34
+tensorflow~=2.2.0
