@@ -6,6 +6,7 @@ import os
 import subprocess
 import psutil
 
+import settings
 from helpers.logger import init_logger
 
 logger = init_logger("ENV Controll", False)
@@ -55,12 +56,12 @@ def start_carla(sim_quality:str="Epic"):
 	logger.info('Starting Carla...')
 	terminate_carla()
 
-	if not os.path.isdir("./lib/Carla"):
+	if not os.path.isdir(settings.PATH_TO_MAIN_CARLA_FOLDER):
 		logger.error("Carla not found!")
 		sys.exit(-1)
 
 	logger.debug(get_exec_command()[1] + f" -carla-rpc-port=2000 -quality-level={sim_quality}")
-	subprocess.Popen(get_exec_command()[1] + f" -carla-rpc-port=2000 -carla-server -quality-level={sim_quality}", cwd="./lib/Carla", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+	subprocess.Popen(get_exec_command()[1] + f" -carla-rpc-port=2000 -carla-server -quality-level={sim_quality}", cwd=settings.PATH_TO_MAIN_CARLA_FOLDER, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
 
 	while True:
 		client = carla.Client("localhost", 2000)

@@ -1,4 +1,6 @@
 ## Simulation
+PATH_TO_MAIN_CARLA_FOLDER = "lib/Carla"
+
 CONNECTION_IP = "localhost"
 CONNECTION_PORT = 2000
 
@@ -108,4 +110,5 @@ EPSILON_DECAY = 0.99997 # 0.99995, 0.99985
 MIN_EPSILON = 0.1
 ##end
 
+# Mic
 RANDOM_SEED = 12586
