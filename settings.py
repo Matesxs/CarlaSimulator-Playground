@@ -72,13 +72,14 @@ ACTIONS = {
 	8: [0.0, 1.0, 1.0]
 }
 
+# Num of episodes to train for / None - infinite
 EPISODES = None
 
 UPDATE_TARGET_EVERY = 100
 TRAINING_EPOCHS = 1
 
 # Batches
-MINIBATCH_SIZE = 32
+MINIBATCH_SIZE = 16
 PREDICTION_BATCH_SIZE = 1
 TRAINING_BATCH_SIZE = MINIBATCH_SIZE // 4
 
