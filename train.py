@@ -68,9 +68,9 @@ class Trainer(Thread):
 		self.action = None
 		self.episode = 0
 		self.epsilon = epsilon
-		self.scores_history = deque(maxlen=10)
+		self.scores_history = deque(maxlen=settings.LOG_EVERY)
 		self.score_record = None
-		self.steps_per_second = deque(maxlen=10)
+		self.steps_per_second = deque(maxlen=settings.LOG_EVERY)
 
 	def get_steps_per_second(self):
 		if len(self.steps_per_second) > 0:
@@ -156,7 +156,7 @@ class Trainer(Thread):
 			reward_factor = settings.FPS_COMPENSATION / average_steps_per_second
 			episode_reward_weighted = ((episode_reward - reward) * reward_factor + reward) * settings.EPISODE_REWARD_MULTIPLIER
 
-			if episode_time > settings.MINIMUM_EPISODE_LENGTH and step >= settings.MINIMUM_STEPS:
+			if episode_time > settings.MINIMUM_EPISODE_LENGTH:
 				self.update_replay_memory(episode_data_memory)
 				self.scores_history.append(episode_reward_weighted)
 				self.episode += 1

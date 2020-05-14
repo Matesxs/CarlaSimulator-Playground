@@ -199,7 +199,12 @@ class ModelHandler(Thread):
 		if settings.FEED_LAST_ACTION_INPUT:
 			damn_data.append(np.array([0]))
 
-		self.__model.predict(damn_data)
+		self.__train_model.fit(x=damn_data, y=np.array([0]), verbose=0)
+
+		st_time = time.time()
+		for _ in range(100000):
+			self.__model.predict(damn_data)
+		logger.info(f"Model crude speed: {round((time.time() - st_time) / 100000, 5)}s/step")
 		del damn_data
 
 		while len(self.__replay_memory) < settings.MIN_REPLAY_MEMORY_SIZE and not self.terminate:

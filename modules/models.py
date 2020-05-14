@@ -96,7 +96,7 @@ def create_model(model_name:str, weights_path:str=None, compile:bool=True) -> Mo
 		x = output
 
 	for layer_name in settings.HIDDEN_LAYERS.keys():
-		x = Dense(settings.HIDDEN_LAYERS[layer_name], activation="linear", name=layer_name)(x)
+		x = Dense(settings.HIDDEN_LAYERS[layer_name], activation="linear", name=layer_name, kernel_initializer=kernel_initializer)(x)
 	predictions = Dense(len(settings.ACTIONS.keys()), activation='linear', name="predictions")(x)
 
 	model_name = f"{settings.MODEL_NAME}"
