@@ -110,12 +110,12 @@ def create_model(model_name:str, weights_path:str=None, compile:bool=True) -> Mo
 
 	for layer_name in settings.HIDDEN_LAYERS.keys():
 		if "dense" in layer_name:
-			x = Dense(settings.HIDDEN_LAYERS[layer_name], activation="relu", name=layer_name, kernel_initializer=kernel_initializer)(x)
+			x = Dense(settings.HIDDEN_LAYERS[layer_name], activation="relu", name=layer_name)(x)
 		elif "dropout" in layer_name:
 			x = Dropout(settings.HIDDEN_LAYERS[layer_name], name=layer_name)(x)
 		else:
 			logger.warning(f"Invalid layer name: {layer_name}")
-	predictions = Dense(len(settings.ACTIONS.keys()), activation='linear', name="predictions", kernel_initializer=kernel_initializer)(x)
+	predictions = Dense(len(settings.ACTIONS.keys()), activation='linear', name="predictions")(x)
 
 	model_name = f"{settings.MODEL_NAME}"
 	if settings.FEED_SPEED_INPUT:

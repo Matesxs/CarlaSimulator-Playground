@@ -72,6 +72,13 @@ class Trainer(Thread):
 		self.score_record = None
 		self.steps_per_second = deque(maxlen=settings.LOG_EVERY)
 
+		self.actions_statistic = deque(maxlen=int(settings.LOG_EVERY * settings.SECONDS_PER_EXPISODE * settings.FPS_COMPENSATION))
+
+	def get_action(self, action:int):
+		num_of_logged_actions = len(self.actions_statistic)
+		if num_of_logged_actions <= 0: return 0
+		return self.actions_statistic.count(action) / num_of_logged_actions
+
 	def get_steps_per_second(self):
 		if len(self.steps_per_second) > 0:
 			return sum(self.steps_per_second) / len(self.steps_per_second)
@@ -116,6 +123,7 @@ class Trainer(Thread):
 
 				if self.epsilon is None or np.random.random() > self.epsilon:
 					self.action = int(np.argmax(self.get_qs(state)))
+					self.actions_statistic.append(self.action)
 				else:
 					self.action = random.choice(list(settings.ACTIONS.keys()))
 
@@ -204,6 +212,16 @@ def train(checkpoint=None):
 		# Shutdown Carla
 		if "localhost" in settings.CONNECTION_IP:
 			terminate_carla()
+
+	def get_actions():
+		actions = {}
+		num_of_agents = len(agents)
+
+		for action in settings.ACTIONS.keys():
+			actions[action] = 0
+			for agent in agents:
+				actions[action] += (agent.get_action(action) / num_of_agents)
+		return actions
 
 	def get_steps_per_second():
 		sp_p_s = 0
@@ -383,10 +401,10 @@ def train(checkpoint=None):
 						# Log stats to tensorboard
 
 						try:
-							trainer.tensorboard.update_stats(step=episode, steps_per_second=steps_per_second, reward=reward, epsilon=epsilon)
+							trainer.tensorboard.update_stats(step=episode, steps_per_second=steps_per_second, reward=reward, epsilon=epsilon, actions=get_actions())
 							trainer.tensorboard.step = episode
-						except:
-							pass
+						except Exception as e:
+							logger.warning(f"Failed to write tensorboard data\n```{e}```")
 
 						checkpoint_training()
 						last_checkpoint = (episode // settings.CHECKPOINT_EVERY) * settings.CHECKPOINT_EVERY
