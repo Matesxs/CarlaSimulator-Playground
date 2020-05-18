@@ -377,19 +377,20 @@ def train(checkpoint=None):
 					epsilon = max(settings.MIN_EPSILON, epsilon)
 					set_epsilon()
 
-				# Checkpoint training
-				if (last_checkpoint + settings.CHECKPOINT_EVERY) <= episode:
-					# Log stats to tensorboard
-					try:
-						trainer.tensorboard.update_stats(step=episode, steps_per_second=steps_per_second, reward=reward, epsilon=epsilon)
-						trainer.tensorboard.step = episode
-					except:
-						pass
-
-					checkpoint_training()
-					last_checkpoint = (episode // settings.CHECKPOINT_EVERY) * settings.CHECKPOINT_EVERY
-
 				if (base_episode + (len(agents) * 2)) < episode:
+					# Checkpoint training
+					if (last_checkpoint + settings.CHECKPOINT_EVERY) <= episode:
+						# Log stats to tensorboard
+
+						try:
+							trainer.tensorboard.update_stats(step=episode, steps_per_second=steps_per_second, reward=reward, epsilon=epsilon)
+							trainer.tensorboard.step = episode
+						except:
+							pass
+
+						checkpoint_training()
+						last_checkpoint = (episode // settings.CHECKPOINT_EVERY) * settings.CHECKPOINT_EVERY
+
 					if score_record:
 						if reward >= settings.MIN_SCORE_TO_SAVE and epsilon <= settings.MAX_EPSILON_TO_SAVE and reward > (score_record + settings.MIN_SCORE_DIF):
 							save_record_model()

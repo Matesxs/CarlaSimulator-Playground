@@ -41,5 +41,9 @@ class TensorBoardCustom(Callback):
 				if name in ['batch', 'size']:
 					continue
 
-				tf.summary.scalar(name, value, step=index)
+				if "actions" in name:
+					for action in value.keys():
+						tf.summary.scalar(f"action_{action}", value[action], step=index)
+				else:
+					tf.summary.scalar(name, value, step=index)
 		self.writer.flush()

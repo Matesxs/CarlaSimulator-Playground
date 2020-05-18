@@ -1,6 +1,6 @@
 import sys
 from tensorflow.keras.models import Model
-from tensorflow.keras.layers import Dense, Input, Conv2D, AveragePooling2D, Flatten, Concatenate
+from tensorflow.keras.layers import Dense, Input, Conv2D, AveragePooling2D, Flatten, Concatenate, Dropout, Activation
 from tensorflow.keras.optimizers import Adam, SGD, Adadelta
 from tensorflow.keras.initializers import RandomNormal
 
@@ -18,52 +18,65 @@ left_camera_input = Input(name="left_camera_input", shape=image_shape)
 # noinspection PyTypeChecker
 combined_cameras_input = Concatenate(name="combine_cameras_concanate")([front_camera_input, left_camera_input, right_camera_input])
 
-def CNN_128_3x64():
-	combined_camera = Conv2D(128, (3, 3), padding='same', name="combine_camera_conv2d_1", activation="relu", kernel_initializer=kernel_initializer)(combined_cameras_input)
-	combined_camera = AveragePooling2D(pool_size=(5, 5), strides=(3, 3), padding='same', name="combine_camera_avgpooling2d_1")(combined_camera)
+# noinspection PyTypeChecker
+def CNN_5_residual():
+	cnn_1 = Conv2D(64, (7, 7), padding='same', kernel_initializer=kernel_initializer)(combined_cameras_input)
+	cnn_1a = Activation('relu')(cnn_1)
+	cnn_1c = Concatenate()([cnn_1a, combined_cameras_input])
+	cnn_1ap = AveragePooling2D(pool_size=(5, 5), strides=(3, 3), padding='same')(cnn_1c)
 
-	combined_camera = Conv2D(64, (3, 3), padding='same', name="combine_camera_conv2d_2", activation="relu", kernel_initializer=kernel_initializer)(combined_camera)
-	combined_camera = AveragePooling2D(pool_size=(5, 5), strides=(3, 3), padding='same', name="combine_camera_avgpooling2d_2")(combined_camera)
+	cnn_2 = Conv2D(64, (5, 5), padding='same', kernel_initializer=kernel_initializer)(cnn_1ap)
+	cnn_2a = Activation('relu')(cnn_2)
+	cnn_2c = Concatenate()([cnn_2a, cnn_1ap])
+	cnn_2ap = AveragePooling2D(pool_size=(5, 5), strides=(3, 3), padding='same')(cnn_2c)
 
-	combined_camera = Conv2D(64, (3, 3), padding='same', activation="relu", name="combine_camera_conv2d_3", kernel_initializer=kernel_initializer)(combined_camera)
-	combined_camera = AveragePooling2D(pool_size=(5, 5), strides=(3, 3), padding='same', name="combine_camera_avgpooling2d_3")(combined_camera)
+	cnn_3 = Conv2D(128, (5, 5), padding='same', kernel_initializer=kernel_initializer)(cnn_2ap)
+	cnn_3a = Activation('relu')(cnn_3)
+	cnn_3c = Concatenate()([cnn_3a, cnn_2ap])
+	cnn_3ap = AveragePooling2D(pool_size=(5, 5), strides=(2, 2), padding='same')(cnn_3c)
 
-	combined_camera = Conv2D(64, (3, 3), padding='same', activation="relu", name="combine_camera_conv2d_4", kernel_initializer=kernel_initializer)(combined_camera)
-	combined_camera = AveragePooling2D(pool_size=(5, 5), strides=(3, 3), padding='same', name="combine_camera_avgpooling2d_4")(combined_camera)
+	cnn_4 = Conv2D(256, (5, 5), padding='same', kernel_initializer=kernel_initializer)(cnn_3ap)
+	cnn_4a = Activation('relu')(cnn_4)
+	cnn_4c = Concatenate()([cnn_4a, cnn_3ap])
+	cnn_4ap = AveragePooling2D(pool_size=(5, 5), strides=(2, 2), padding='same')(cnn_4c)
+
+	cnn_5 = Conv2D(512, (3, 3), padding='same', kernel_initializer=kernel_initializer)(cnn_4ap)
+	cnn_5a = Activation('relu')(cnn_5)
+	cnn_5ap = AveragePooling2D(pool_size=(3, 3), strides=(2, 2), padding='same')(cnn_5a)
+
+	flatten = Flatten()(cnn_5ap)
+
+	return flatten
+
+def CNN_4_base():
+	combined_camera = Conv2D(64, (3, 3), padding='same', activation="relu", kernel_initializer=kernel_initializer)(combined_cameras_input)
+	combined_camera = AveragePooling2D(pool_size=(5, 5), strides=(3, 3), padding='same')(combined_camera)
+
+	combined_camera = Conv2D(64, (3, 3), padding='same', activation="relu", kernel_initializer=kernel_initializer)(combined_camera)
+	combined_camera = AveragePooling2D(pool_size=(5, 5), strides=(3, 3), padding='same')(combined_camera)
+
+	combined_camera = Conv2D(64, (3, 3), padding='same', activation="relu", kernel_initializer=kernel_initializer)(combined_camera)
+	combined_camera = AveragePooling2D(pool_size=(5, 5), strides=(3, 3), padding='same')(combined_camera)
+
+	combined_camera = Conv2D(64, (3, 3), padding='same', activation="relu", kernel_initializer=kernel_initializer)(combined_camera)
+	combined_camera = AveragePooling2D(pool_size=(5, 5), strides=(3, 3), padding='same')(combined_camera)
 
 	combined_camera = Flatten(name="combine_camera_flatten")(combined_camera)
 
 	return combined_camera
 
-def CNN_4x64():
-	combined_camera = Conv2D(64, (3, 3), padding='same', name="combine_camera_conv2d_1", activation="relu", kernel_initializer=kernel_initializer)(combined_cameras_input)
-	combined_camera = AveragePooling2D(pool_size=(5, 5), strides=(3, 3), padding='same', name="combine_camera_avgpooling2d_1")(combined_camera)
+def CNN_4_h2l():
+	combined_camera = Conv2D(256, (3, 3), padding='same', activation="relu", kernel_initializer=kernel_initializer)(combined_cameras_input)
+	combined_camera = AveragePooling2D(pool_size=(5, 5), strides=(3, 3), padding='same')(combined_camera)
 
-	combined_camera = Conv2D(64, (3, 3), padding='same', name="combine_camera_conv2d_2", activation="relu", kernel_initializer=kernel_initializer)(combined_camera)
-	combined_camera = AveragePooling2D(pool_size=(5, 5), strides=(3, 3), padding='same', name="combine_camera_avgpooling2d_2")(combined_camera)
+	combined_camera = Conv2D(128, (3, 3), padding='same', activation="relu", kernel_initializer=kernel_initializer)(combined_camera)
+	combined_camera = AveragePooling2D(pool_size=(5, 5), strides=(3, 3), padding='same')(combined_camera)
 
-	combined_camera = Conv2D(64, (3, 3), padding='same', activation="relu", name="combine_camera_conv2d_3", kernel_initializer=kernel_initializer)(combined_camera)
-	combined_camera = AveragePooling2D(pool_size=(5, 5), strides=(3, 3), padding='same', name="combine_camera_avgpooling2d_3")(combined_camera)
+	combined_camera = Conv2D(128, (3, 3), padding='same', activation="relu", kernel_initializer=kernel_initializer)(combined_camera)
+	combined_camera = AveragePooling2D(pool_size=(5, 5), strides=(3, 3), padding='same')(combined_camera)
 
-	combined_camera = Conv2D(64, (3, 3), padding='same', activation="relu", name="combine_camera_conv2d_4", kernel_initializer=kernel_initializer)(combined_camera)
-	combined_camera = AveragePooling2D(pool_size=(5, 5), strides=(3, 3), padding='same', name="combine_camera_avgpooling2d_4")(combined_camera)
-
-	combined_camera = Flatten(name="combine_camera_flatten")(combined_camera)
-
-	return combined_camera
-
-def CNN_base_4():
-	combined_camera = Conv2D(256, (3, 3), padding='same', name="combine_camera_conv2d_1", activation="relu", kernel_initializer=kernel_initializer)(combined_cameras_input)
-	combined_camera = AveragePooling2D(pool_size=(5, 5), strides=(3, 3), padding='same', name="combine_camera_avgpooling2d_1")(combined_camera)
-
-	combined_camera = Conv2D(128, (3, 3), padding='same', name="combine_camera_conv2d_2", activation="relu", kernel_initializer=kernel_initializer)(combined_camera)
-	combined_camera = AveragePooling2D(pool_size=(5, 5), strides=(3, 3), padding='same', name="combine_camera_avgpooling2d_2")(combined_camera)
-
-	combined_camera = Conv2D(128, (3, 3), padding='same', activation="relu", name="combine_camera_conv2d_3", kernel_initializer=kernel_initializer)(combined_camera)
-	combined_camera = AveragePooling2D(pool_size=(5, 5), strides=(3, 3), padding='same', name="combine_camera_avgpooling2d_3")(combined_camera)
-
-	combined_camera = Conv2D(64, (3, 3), padding='same', activation="relu", name="combine_camera_conv2d_4", kernel_initializer=kernel_initializer)(combined_camera)
-	combined_camera = AveragePooling2D(pool_size=(5, 5), strides=(3, 3), padding='same', name="combine_camera_avgpooling2d_4")(combined_camera)
+	combined_camera = Conv2D(64, (3, 3), padding='same', activation="relu", kernel_initializer=kernel_initializer)(combined_camera)
+	combined_camera = AveragePooling2D(pool_size=(5, 5), strides=(3, 3), padding='same')(combined_camera)
 
 	combined_camera = Flatten(name="combine_camera_flatten")(combined_camera)
 
@@ -96,8 +109,13 @@ def create_model(model_name:str, weights_path:str=None, compile:bool=True) -> Mo
 		x = output
 
 	for layer_name in settings.HIDDEN_LAYERS.keys():
-		x = Dense(settings.HIDDEN_LAYERS[layer_name], activation="linear", name=layer_name, kernel_initializer=kernel_initializer)(x)
-	predictions = Dense(len(settings.ACTIONS.keys()), activation='linear', name="predictions")(x)
+		if "dense" in layer_name:
+			x = Dense(settings.HIDDEN_LAYERS[layer_name], activation="relu", name=layer_name, kernel_initializer=kernel_initializer)(x)
+		elif "dropout" in layer_name:
+			x = Dropout(settings.HIDDEN_LAYERS[layer_name], name=layer_name)(x)
+		else:
+			logger.warning(f"Invalid layer name: {layer_name}")
+	predictions = Dense(len(settings.ACTIONS.keys()), activation='linear', name="predictions", kernel_initializer=kernel_initializer)(x)
 
 	model_name = f"{settings.MODEL_NAME}"
 	if settings.FEED_SPEED_INPUT:
