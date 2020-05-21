@@ -7,14 +7,14 @@ CONNECTION_PORT = 2000
 SIM_QUALITY = "Low" # Low / Epic
 
 NUM_OF_AGENTS = 4
-PREVIEW_AGENTS = True
+PREVIEW_AGENTS = False
 
 FPS_COMPENSATION = 20.0
 LOG_EVERY = 10
 
 # End thresholds
 ROTATION_THRESHOLD = 75
-COLLISION_FILTER = [['static.sidewalk', -1], ['static.road', -1], ['vehicle.', 100]]
+COLLISION_FILTER = [['static.sidewalk', -1], ['static.road', -1], ['vehicle.', 80]]
 
 SECONDS_PER_EXPISODE = 30.0
 
@@ -47,7 +47,9 @@ CAMERA_FOV = 130
 ##end
 
 ## Training settings
-MIN_FPS_FOR_TRAINING = 7
+START_TENSORBOARD_ON_TRAINING = True
+
+MIN_FPS_FOR_TRAINING = 5
 
 # Model save settings
 MIN_SCORE_TO_SAVE = -200
