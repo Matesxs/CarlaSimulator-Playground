@@ -60,8 +60,8 @@ def start_carla(sim_quality:str="Epic"):
 		logger.error("Carla not found!")
 		sys.exit(-1)
 
-	logger.debug(get_exec_command()[1] + f" -carla-rpc-port=2000 -quality-level={sim_quality}")
-	subprocess.Popen(get_exec_command()[1] + f" -carla-rpc-port=2000 -carla-server -quality-level={sim_quality}", cwd=settings.PATH_TO_MAIN_CARLA_FOLDER, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+	logger.debug(get_exec_command()[1] + f" -carla-rpc-port=2000 -carla-server -quality-level={sim_quality} -fps={settings.FPS_COMPENSATION}")
+	subprocess.Popen(get_exec_command()[1] + f" -carla-rpc-port=2000 -carla-server -quality-level={sim_quality} -fps={settings.FPS_COMPENSATION}", cwd=settings.PATH_TO_MAIN_CARLA_FOLDER, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
 
 	while True:
 		client = carla.Client("localhost", 2000)
