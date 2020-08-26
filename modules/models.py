@@ -65,6 +65,20 @@ def CNN_4_base():
 
 	return combined_camera
 
+def CNN_3_base():
+	combined_camera = Conv2D(64, (3, 3), padding='same', activation="relu", kernel_initializer=kernel_initializer)(combined_cameras_input)
+	combined_camera = AveragePooling2D(pool_size=(5, 5), strides=(3, 3), padding='same')(combined_camera)
+
+	combined_camera = Conv2D(64, (3, 3), padding='same', activation="relu", kernel_initializer=kernel_initializer)(combined_camera)
+	combined_camera = AveragePooling2D(pool_size=(5, 5), strides=(3, 3), padding='same')(combined_camera)
+
+	combined_camera = Conv2D(64, (3, 3), padding='same', activation="relu", kernel_initializer=kernel_initializer)(combined_camera)
+	combined_camera = AveragePooling2D(pool_size=(5, 5), strides=(3, 3), padding='same')(combined_camera)
+
+	combined_camera = Flatten(name="combine_camera_flatten")(combined_camera)
+
+	return combined_camera
+
 def CNN_4_h2l():
 	combined_camera = Conv2D(256, (3, 3), padding='same', activation="relu", kernel_initializer=kernel_initializer)(combined_cameras_input)
 	combined_camera = AveragePooling2D(pool_size=(5, 5), strides=(3, 3), padding='same')(combined_camera)

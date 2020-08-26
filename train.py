@@ -19,13 +19,13 @@ sys.stdin = stdin
 sys.stderr = stderr
 
 import tensorflow as tf
+
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 gpus = tf.config.experimental.list_physical_devices('GPU')
 if gpus:
 	try:
-		for gpu in gpus:
-			tf.config.experimental.set_memory_growth(gpu, True)
+			tf.config.experimental.set_memory_growth(gpus[0], True)
 	except:
 		pass
 
@@ -42,12 +42,14 @@ logger = init_logger("Training", False)
 random.seed(settings.RANDOM_SEED)
 tf.random.set_seed(settings.RANDOM_SEED)
 
+
 def save_models(trainer, model_name, episode, epsilon, score):
 	model_name = f"{model_name}__{episode}ep__{epsilon}eps__{score}score.h5"
 	path = os.path.join(settings.MODEL_SAVE_PATH, model_name)
 
 	logger.info(f"Saving new record model\n{model_name}")
 	trainer.save_weights(path)
+
 
 class Trainer(Thread):
 	def __init__(self, client, identifier, epsilon, get_qs_callbatch, update_replay_memory_callback):
@@ -74,7 +76,7 @@ class Trainer(Thread):
 
 		self.actions_statistic = deque(maxlen=int(settings.LOG_EVERY * settings.SECONDS_PER_EXPISODE * settings.FPS_COMPENSATION))
 
-	def get_action(self, action:int):
+	def get_action(self, action: int):
 		num_of_logged_actions = len(self.actions_statistic)
 		if num_of_logged_actions <= 0: return 0
 		return self.actions_statistic.count(action) / num_of_logged_actions
@@ -173,6 +175,7 @@ class Trainer(Thread):
 
 		logger.info(f"Trainer {self.identifier} stopped")
 
+
 def train(checkpoint=None):
 	base_episode = 0
 	epsilon = settings.START_EPSILON
@@ -184,8 +187,11 @@ def train(checkpoint=None):
 		base_episode = checkpoint["episode"]
 		epsilon = checkpoint["epsilon"]
 		score_record = checkpoint["score_record"]
-		model_weights = checkpoint["weights"]
-		target_model_weights = checkpoint["target_weights"]
+
+		if not model_weights:
+			model_weights = checkpoint["weights"]
+		if not target_model_weights:
+			target_model_weights = checkpoint["target_weights"]
 
 	last_episode = base_episode
 	last_logged_episode = base_episode
@@ -301,12 +307,12 @@ def train(checkpoint=None):
 			x2 = x1 + settings.PREVIEW_CAMERA_IMAGE_DIMENSIONS[0]
 
 			agent_img = agent.get_preview_data()
-			agent_img = cv2.putText(agent_img, f'Agent {agent.identifier}', (10, 30), cv2.FONT_HERSHEY_SIMPLEX , 1, (255, 30, 0), 2, cv2.LINE_AA)
+			agent_img = cv2.putText(agent_img, f'Agent {agent.identifier}', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 30, 0), 2, cv2.LINE_AA)
 			agent_img = cv2.putText(agent_img, f'A: {agent.action}', (10, 65), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 30, 0), 2, cv2.LINE_AA)
-			prev_image[y1 : y2, x1 : x2] = agent_img
+			prev_image[y1: y2, x1: x2] = agent_img
 
 		if settings.EPISODES is not None:
-			prev_image = cv2.putText(prev_image, f"Ep: {episode}/{settings.EPISODES} - Steps per second (Crude FPS): {steps_per_second}, Reward: {reward}, Epsilon: {round(epsilon, 5)}", (10, prev_image.shape[0] - 15), cv2.FONT_HERSHEY_SIMPLEX , 1, (255, 0, 0), 2, cv2.LINE_AA)
+			prev_image = cv2.putText(prev_image, f"Ep: {episode}/{settings.EPISODES} - Steps per second (Crude FPS): {steps_per_second}, Reward: {reward}, Epsilon: {round(epsilon, 5)}", (10, prev_image.shape[0] - 15), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
 		else:
 			prev_image = cv2.putText(prev_image, f"Ep: {episode} - Steps per second (Crude FPS): {steps_per_second}, Reward: {reward}, Epsilon: {round(epsilon, 5)}", (10, prev_image.shape[0] - 15), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
 		prev_image = cv2.resize(prev_image, dsize=None, fx=0.5, fy=0.5)
@@ -337,6 +343,7 @@ def train(checkpoint=None):
 	trainer = ModelHandler(settings.MODEL_NAME, weights_path=model_weights, target_weights_path=target_model_weights, train=True)
 	trainer.tensorboard.step = base_episode
 	trainer.__last_logged_episode = base_episode
+	trainer.print_model_summary()
 	trainer.start()
 	logger.info("Trainer started")
 
@@ -427,7 +434,7 @@ def train(checkpoint=None):
 			if get_fail_flags():
 				logger.info("Stopping environment")
 				break
-				
+
 			time.sleep(0.001)
 	except KeyboardInterrupt:
 		logger.info("Exiting - Keyboard Interrupt")
@@ -437,6 +444,7 @@ def train(checkpoint=None):
 		# Destroy preview window and close environment
 		cv2.destroyAllWindows()
 		terminate_environment()
+
 
 if __name__ == '__main__':
 	model_name = f"{settings.MODEL_NAME}"

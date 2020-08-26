@@ -59,6 +59,10 @@ class ModelHandler(Thread):
 
 		plot_model(self.__model, f"{self.__model.name}.png", show_shapes=True, expand_nested=True)
 		logger.info("Trainer initialized")
+		
+	def print_model_summary(self):
+		if self.__model:
+			self.__model.summary()
 
 	def switch_halt_state(self):
 		if not self.__training: return None

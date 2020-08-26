@@ -28,7 +28,7 @@ if __name__ == '__main__':
 			logger.error(f"Infinite loop exception\n{e}")
 
 	if tbp:
-		tbp.send_signal(subprocess.signal.CTRL_C_EVENT)
+		tbp.send_signal(subprocess.signal.SIGKILL)
 
 	logger.info("Infinite trainer finished")
 	logger.info(f"Restarts count: {num_of_restarts}")

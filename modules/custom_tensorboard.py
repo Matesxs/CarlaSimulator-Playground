@@ -8,20 +8,28 @@ logger = init_logger("Tensorboard", False)
 
 class TensorBoardCustom(Callback):
 	def __init__(self, log_dir):
+		super().__init__()
 		self.step = 0
 		self.log_dir = log_dir
-		self.writer = tf.summary.create_file_writer(self.log_dir)
+		self.writer = None
 
 	def __del__(self):
 		try:
-			self.writer.close()
+			if self.writer:
+				self.writer.close()
 		except:
 			pass
 
 	def on_epoch_end(self, epoch, logs=None):
 		self.update_stats(self.step, **logs)
 
+	def init_writer_check(self):
+		if not self.writer:
+			self.writer = tf.summary.create_file_writer(self.log_dir)
+
 	def log_weights(self, model:tf.keras.Model):
+		self.init_writer_check()
+
 		with self.writer.as_default():
 			for layer in model.layers:
 				for weight in layer.weights:
@@ -36,6 +44,8 @@ class TensorBoardCustom(Callback):
 	# More or less the same writer as in Keras' Tensorboard callback
 	# Physically writes to the log files
 	def _write_logs(self, logs, index):
+		self.init_writer_check()
+
 		with self.writer.as_default():
 			for name, value in logs.items():
 				if name in ['batch', 'size']:
