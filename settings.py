@@ -62,15 +62,15 @@ CHECKPOINT_SAVE_PATH = "checkpoint"
 
 DEFAULT_ACTION = 7
 ACTIONS = {
-	0: [0.7, -1.0, 0.0],
-	1: [1.0, 0.0, 0.0],
-	2: [0.7, 1.0, 0.0],
-	3: [0.0, -1.0, 0.0],
-	4: [0.0, 0.0, 0.0],
-	5: [0.0, 1.0, 0.0],
-	6: [0.0, -1.0, 1.0],
-	7: [0.0, 0.0, 1.0],
-	8: [0.0, 1.0, 1.0]
+  0: [0.7, -1.0, 0.0],
+  1: [1.0, 0.0, 0.0],
+  2: [0.7, 1.0, 0.0],
+  3: [0.0, -1.0, 0.0],
+  4: [0.0, 0.0, 0.0],
+  5: [0.0, 1.0, 0.0],
+  6: [0.0, -1.0, 1.0],
+  7: [0.0, 0.0, 1.0],
+  8: [0.0, 1.0, 1.0]
 }
 
 # Num of episodes to train for / None - infinite
@@ -92,7 +92,7 @@ TARGET_WEIGHTS_PATH = None
 FEED_LAST_ACTION_INPUT = True
 FEED_SPEED_INPUT = True
 HIDDEN_LAYERS = {
-	"hidden_dense_1": 256
+  "hidden_dense_1": 256
 }
 
 # Optimizer settings
